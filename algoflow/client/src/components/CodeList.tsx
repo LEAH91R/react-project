@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { fetchCodes } from "../api";
+import React, { useEffect, useState } from 'react';
+import { fetchCodes } from '../api';
 
 const CodeList: React.FC = () => {
   const [codes, setCodes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const getCodes = async () => {
@@ -12,7 +12,7 @@ const CodeList: React.FC = () => {
         const response = await fetchCodes();
         setCodes(response.data);
       } catch (err) {
-        setError("Failed to fetch codes");
+        setError('Failed to fetch codes');
       } finally {
         setLoading(false);
       }
@@ -26,7 +26,10 @@ const CodeList: React.FC = () => {
   return (
     <ul>
       {codes.map((code) => (
-        <li key={code.id}>{code.name}</li>
+        <li key={code._id ?? code.id}>
+          <strong>Code:</strong> {code.code} <br />
+          <strong>Expected Time:</strong> {code.expectedTime}ms
+        </li>
       ))}
     </ul>
   );

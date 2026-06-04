@@ -56,10 +56,10 @@ export const loginHandler = async (request: FastifyRequest, reply: FastifyReply)
       return reply.status(401).send({ error: 'פרטי התחברות שגויים' });
     }
 
-    // יצירת טוקן JWT מוצפן שמכיל את ה-ID והתפקיד (Role) של המשתמש
+    // יצירת טוקן JWT מוצפן שמכיל את userId, email והתפקיד (Role) של המשתמש
     // הגישה ל-jwt מתבצעת דרך request.server מכיוון שאנו בתוך פונקציית קונטרולר חיצונית
     const token = request.server.jwt.sign(
-      { id: user._id, role: user.role },
+      { userId: user._id, email: user.email, role: user.role },
       { expiresIn: '1d' } // תוקף הטוקן: יום אחד
     );
 

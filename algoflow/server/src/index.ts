@@ -1,38 +1,48 @@
 import fastify from 'fastify';
-import mongoose from 'mongoose';
-import fastifyJwt from '@fastify/jwt'; // <-- הוסיפו את הייבוא הזה
+import fastifyJwt from '@fastify/jwt';
 
-import { authRoutes } from './routes/auth.routes'; // <-- 1. הוסיפו את הייבוא
+import { env } from './config/env';
+import { connectDatabase } from './config/db';
+import { logger } from './logger/logger';
+import { registerRoutes } from './routes';
+import { errorHandler } from './middlewares/errorHandler';
+import { startSubmissionWorker } from './queue/submissionWorker';
 
-const server = fastify({ logger: true });
-
+const server = fastify({
+  logger: true,
+});
 server.register(fastifyJwt, {
-  secret: process.env.JWT_SECRET || 'fallback_secret'
+  secret: env.JWT_SECRET,
 });
 
-// 2. רישום נתיבי ה-Authentication בשרת
-server.register(authRoutes);
-
-
-// אם MONGO_URI לא מוגדר ב-env, הוא ישתמש בכתובת הלוקאלית הזו כמחרוזת בוודאות
-const MONGO_URI = process.env.MONGO_URI ;
-// אם PORT לא מוגדר, הוא ישתמש ב-5000 כברירת מחדל
-const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5000;
-server.get('/health', async (request, reply) => {
-  return { status: 'ok', message: 'LogicRoot Fastify Server is running' };
+server.addHook('onSend', async (request, reply, payload) => {
+  reply.header('Access-Control-Allow-Origin', '*');
+  reply.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  return payload;
 });
+
+server.options('/*', async (request, reply) => {
+  reply
+    .header('Access-Control-Allow-Origin', '*')
+    .header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS')
+    .header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    .send({ status: 'ok' });
+});
+
+server.setErrorHandler(errorHandler);
+
+server.get('/health', async () => ({ status: 'ok', message: 'LogicRoot Fastify Server is running' }));
 
 const start = async () => {
   try {
-    // 1. מתחברים קודם כל למסד הנתונים
-    await mongoose.connect(process.env.MONGO_URI !);
-    console.log('🍃 Successfully connected to MongoDB!');
-
-    // 2. רק אחרי שהחיבור ל-DB הצליח, השרת מתחיל להקשיב
-    await server.listen({ port: PORT, host: '0.0.0.0' });
-    console.log(`🚀 Fastify server is floating on http://localhost:${PORT}`);
-  } catch (err) {
-    server.log.error(err);
+    await connectDatabase();
+    await registerRoutes(server);
+    startSubmissionWorker();
+    await server.listen({ port: env.PORT, host: '0.0.0.0' });
+    logger.info(`Server is running on http://localhost:${env.PORT}`);
+  } catch (error) {
+    logger.error({ err: error }, 'Server startup failed');
     process.exit(1);
   }
 };

