@@ -1,84 +1,67 @@
 import React from 'react';
-import { BrowserRouter as Router, Link, Route, Switch, Redirect } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import CodeInput from './components/CodeInput';
-import CodeList from './components/CodeList';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route
+} from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import Navbar from './components/Navbar';
 import Login from './components/Login';
 import Register from './components/Register';
+import CodeInput from './components/CodeInput';
 import ChallengeList from './components/ChallengeList';
 import ChallengeDetail from './components/ChallengeDetail';
 import SubmissionList from './components/SubmissionList';
 
-const ProtectedRoute: React.FC<{ component: React.ComponentType; path: string; exact?: boolean }> = ({
-  component: Component,
-  path,
-  exact = false
-}) => {
-  const { isAuthenticated } = useAuth();
+import './styles/globals.css';
+import './styles/layout.css';
+import './styles/auth.css';
+import './styles/challenge.css';
+import './styles/playground.css';
 
-  return (
-    <Route
-      path={path}
-      exact={exact}
-      render={() =>
-        isAuthenticated ? <Component /> : <Redirect to="/login" />
-      }
-    />
-  );
-};
-
-const Navigation: React.FC = () => {
-  const { isAuthenticated, logout } = useAuth();
-
-  const handleLogout = () => {
-    logout();
-  };
-
-  return (
-    <nav style={{ marginBottom: '20px', paddingBottom: '10px', borderBottom: '1px solid gray' }}>
-      <Link to="/">Home</Link>
-      {' | '}
-      {isAuthenticated ? (
-        <>
-          <Link to="/challenges">Challenges</Link>
-          {' | '}
-          <Link to="/submissions">My Submissions</Link>
-          {' | '}
-          <button onClick={handleLogout} style={{ cursor: 'pointer' }}>
-            Logout
-          </button>
-        </>
-      ) : (
-        <>
-          <Link to="/login">Login</Link>
-          {' | '}
-          <Link to="/register">Register</Link>
-        </>
-      )}
-    </nav>
-  );
-};
-
-const App: React.FC = () => {
+function App() {
   return (
     <AuthProvider>
       <Router>
-        <Navigation />
-        <Switch>
-          <Route path="/" exact component={CodeInput} />
-          <Route path="/codes" component={CodeList} />
-          <Route path="/login" component={Login} />
-          <Route path="/register" component={Register} />
-          <Route path="/challenges" exact component={ChallengeList} />
-          <ProtectedRoute
-          path="/challenges/:id"
-          component={ChallengeDetail}
-          />
-          <ProtectedRoute path="/submissions" exact component={SubmissionList} />
-        </Switch>
+        <div className="app-layout">
+
+          <Navbar />
+
+          <main className="main-content">
+
+            <Switch>
+
+              <Route exact path="/">
+                <CodeInput />
+              </Route>
+
+              <Route path="/login">
+                <Login />
+              </Route>
+
+              <Route path="/register">
+                <Register />
+              </Route>
+
+              <Route exact path="/challenges">
+                <ChallengeList />
+              </Route>
+
+              <Route path="/challenges/:id">
+                <ChallengeDetail />
+              </Route>
+
+              <Route path="/submissions">
+                <SubmissionList />
+              </Route>
+
+            </Switch>
+
+          </main>
+
+        </div>
       </Router>
     </AuthProvider>
   );
-};
-
+}
 export default App;

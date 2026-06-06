@@ -21,45 +21,66 @@ const Register: React.FC = () => {
       setTimeout(() => {
         history.push('/login');
       }, 1500);
-    } catch (error: any) {
-      setMessage(error.response?.data?.error || 'Registration failed');
-    } finally {
+    }catch (error: any) {
+  console.log(error.response?.data);
+
+  if (error.response?.data?.details) {
+    setMessage(
+      JSON.stringify(error.response.data.details)
+    );
+  } else {
+    setMessage(
+      error.response?.data?.error ||
+      'Registration failed'
+    );
+  }
+} finally {
       setLoading(false);
     }
   };
+return (
+  <div className="auth-container">
 
-  return (
-    <div>
-      <form onSubmit={handleRegister}>
-        <h2>Register</h2>
-        <label>Username:</label>
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <label>Email:</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <label>Password:</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Registering...' : 'Register'}
-        </button>
-        {message && <p>{message}</p>}
-      </form>
-    </div>
-  );
-};
+    <h1 className="auth-title">
+      Create Account
+    </h1>
 
+    <form onSubmit={handleRegister}>
+
+      <input
+        className="auth-input"
+        placeholder="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
+
+      <input
+        className="auth-input"
+        placeholder="Email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <input
+        className="auth-input"
+        placeholder="Password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+
+      <button
+        type="submit"
+        className="auth-button"
+      >
+        Register
+      </button>
+
+    </form>
+
+    {message && <p>{message}</p>}
+  </div>
+);
+}
 export default Register;

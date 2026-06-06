@@ -33,15 +33,31 @@ const ChallengeList: React.FC = () => {
       <h2>Challenges</h2>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {challenges.length === 0 && !error && <p>No challenges available.</p>}
-      <ul>
-        {challenges.map((challenge) => (
-          <li key={challenge._id}>
-            <Link to={`/challenges/${challenge._id}`}>
-              {challenge.title} <span>({challenge.difficulty})</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <div className="challenge-grid">
+  {challenges.map((challenge) => (
+    <div
+      key={challenge._id}
+      className="challenge-card"
+    >
+      <h3>{challenge.title}</h3>
+
+      <span
+        className={`difficulty ${challenge.difficulty.toLowerCase()}`}
+      >
+        {challenge.difficulty}
+      </span>
+
+      <p>{challenge.description}</p>
+
+      <Link
+        to={`/challenges/${challenge._id}`}
+        className="challenge-button"
+      >
+        Solve Challenge
+      </Link>
+    </div>
+  ))}
+</div>
     </div>
   );
 };

@@ -1,0 +1,33 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    min-height: 100%;
+}
+
+body {
+    font-family:
+        Inter,
+        Segoe UI,
+        sans-serif;
+
+    background:
+        linear-gradient(
+            135deg,
+            #081120,
+            #16243f
+        );
+
+    color: white;
+
+    overflow-x: hidden;
+}
+
+a {
+    text-decoration: none;
+}

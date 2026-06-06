@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import bcrypt from 'bcrypt';
 import { User } from '../models/User';
 import { RegisterSchema, LoginSchema } from '../validators/auth.validator';
-
+import { successResponse } from '../utils/apiResponse';
 // 1. לוגיקת הרשמה (Register)
 export const registerHandler = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
@@ -63,15 +63,30 @@ export const loginHandler = async (request: FastifyRequest, reply: FastifyReply)
       { expiresIn: '1d' } // תוקף הטוקן: יום אחד
     );
 
-    return reply.status(200).send({
-      message: 'התחברת בהצלחה',
+//     return reply.status(200).send({
+//       message: 'התחברת בהצלחה',
+//       token,
+//       user: { id: user._id, username: user.username, role: user.role }
+//     });
+//   } catch (error: any) {
+//     if (error.issues) {
+//       return reply.status(400).send({ error: 'שגיאת ולידציה', details: error.issues });
+//     }
+//     return reply.status(500).send({ error: 'שגיאת שרת פנימית' });
+//   }
+// };
+return reply.status(200).send(
+  successResponse(
+    {
       token,
-      user: { id: user._id, username: user.username, role: user.role }
-    });
-  } catch (error: any) {
-    if (error.issues) {
-      return reply.status(400).send({ error: 'שגיאת ולידציה', details: error.issues });
-    }
-    return reply.status(500).send({ error: 'שגיאת שרת פנימית' });
-  }
-};
+      user: {
+        id: user._id,
+        username: user.username,
+        role: user.role
+      }
+    },
+    'התחברת בהצלחה'
+  )
+)}finally{
+
+}};
